@@ -3,11 +3,10 @@ import csv
 import lxml
 import re
 from bs4 import BeautifulSoup as bs
+import pickle, shelve
 
 headers = {'accept': '*/*',
             'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'}
-
-base_url = 'https://www.cian.ru/cat.php?deal_type=sale&engine_version=2&object_type%5B0%5D=1&offer_type=flat&p=2&region=1&room2=1'
 
 # функция, которая вычленяет необходимые данные из одной квартиры
 def cian_parce(href, headers):
@@ -38,17 +37,24 @@ def cian_parce(href, headers):
 
 # функция, собирающая список ссылок на квартиры
 def cian_parce_flats(base_url, headers):
+    num = 0
     session = requests.Session()
     request = session.get(base_url, headers=headers)
     if request.status_code == 200:
         soup = bs(request.content, 'lxml')
         divs = soup.find_all('div', attrs={'class': 'c6e8ba5398--main-container--1FMpY'})
         for div in divs:
+            num += 1
             #title = div.find('a', attrs={'class': 'c6e8ba5398--header--1fV2A'}).text 
             href = div.find('a', attrs={'class': 'c6e8ba5398--header--1fV2A'})['href']
-            cian_parce(href, headers)
+            #cian_parce(href, headers)
+            print (num, "_", href )
     else:
         print("ERROR flats")
-                
 
-cian_parce_flats(base_url, headers)
+# открываем законсервированный файл с url на каждую страницу поиска и подставляем url в цикл              
+f = open('links.dat','rb')
+dict = pickle.load(f)
+for base_url in dict:
+    a = (dict[base_url])
+    cian_parce_flats(a, headers)
