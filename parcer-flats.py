@@ -38,6 +38,7 @@ def cian_parce(href, headers):
 # функция, собирающая список ссылок на квартиры
 def cian_parce_flats(base_url, headers):
     num = 0
+    #response = requests.get(base_url, timeout=(10, 0.01)) # таймаут на соединения, таймаут на чтение (в секундах)
     session = requests.Session()
     request = session.get(base_url, headers=headers)
     if request.status_code == 200:
@@ -53,8 +54,11 @@ def cian_parce_flats(base_url, headers):
         print("ERROR flats")
 
 # открываем законсервированный файл с url на каждую страницу поиска и подставляем url в цикл              
-f = open('links.dat','rb')
+f = open('links_of_30_pages.dat','rb')
 dict = pickle.load(f)
+num_p = 0
 for base_url in dict:
-    a = (dict[base_url])
+    num_p += 1
+    a = dict[base_url]
     cian_parce_flats(a, headers)
+    print ("Страница поиска_", num_p, end='\n ')
